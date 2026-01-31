@@ -1113,8 +1113,8 @@
 /* Theme toggle — top left */
 .theme-toggle {
   position: fixed;
-  top: 12px;
-  left: 12px;
+  top: 27px;
+  left: 27px;
   z-index: 999;
   width: 44px;
   height: 44px;
