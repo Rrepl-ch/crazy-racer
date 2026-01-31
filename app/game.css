@@ -398,6 +398,8 @@
   .score-display {
     font-size: 20px;
     padding: 4px 12px;
+    left: 50%;
+    transform: translateX(-50%);
   }
 
   .game-pause-btn {
