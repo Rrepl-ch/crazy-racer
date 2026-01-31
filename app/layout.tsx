@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Source_Code_Pro } from "next/font/google";
 import { SafeArea } from "./components/SafeArea";
+import { ThemeProvider } from "./providers/ThemeProvider";
+import { ThemeToggle } from "./components/ThemeToggle";
+import { WelcomePopup } from "./components/WelcomePopup";
 import { farcasterConfig } from "../farcaster.config";
 import { Providers } from "./providers";
 import "./globals.css";
@@ -43,9 +46,20 @@ export default function RootLayout({
 }>) {
   return (
     <Providers>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
+        <head>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(){var t=localStorage.getItem('jdm_theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})();`,
+            }}
+          />
+        </head>
         <body className={`${inter.variable} ${sourceCodePro.variable}`}>
-          <SafeArea>{children}</SafeArea>
+          <ThemeProvider>
+            <ThemeToggle />
+            <WelcomePopup />
+            <SafeArea>{children}</SafeArea>
+          </ThemeProvider>
         </body>
       </html>
     </Providers>
