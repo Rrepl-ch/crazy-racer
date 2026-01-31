@@ -6,6 +6,7 @@ import { CarSelect } from './CarSelect';
 import { Leaderboard } from './Leaderboard';
 import { CARS } from '@/app/types/cars';
 import { useOwnedCars, useMintCar } from '@/app/lib/useCrazyRacerContract';
+import { useNicknameStatus, useMintNickname } from '@/app/lib/useNicknameContract';
 
 const STORAGE_OWNED = 'jdm_owned_cars';
 const STORAGE_SELECTED = 'jdm_selected_car';
@@ -71,6 +72,13 @@ export function MainMenu({ nickname, setNickname, onNicknameSubmit, onPlay, menu
   const { mint, isPending: mintPending, contractDeployed } = useMintCar(browsedCarId, () => {
     refetchOwned();
   });
+
+  const { hasNickname, nickname: contractNickname, refetch: refetchNick, contractDeployed: nickContractDeployed } = useNicknameStatus();
+  const { mint: mintNickname, isPending: mintNickPending, error: mintNickError } = useMintNickname(() => refetchNick());
+
+  useEffect(() => {
+    if (mintNickError) setNickError(mintNickError.message || 'Mint failed');
+  }, [mintNickError]);
 
   const ownedCarIds = useMemo(() => {
     if (contractDeployed && address) return contractOwned;
@@ -157,10 +165,32 @@ export function MainMenu({ nickname, setNickname, onNicknameSubmit, onPlay, menu
     else setNickError('Nickname taken or invalid. Choose another.');
   }, [onNicknameSubmit, isConnected]);
 
+  const handleMintNickname = useCallback(() => {
+    setNickError('');
+    const trimmed = nickname.trim();
+    if (trimmed.length < 2 || trimmed.length > 20) {
+      setNickError('Nickname must be 2–20 characters');
+      return;
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(trimmed)) {
+      setNickError('Only letters, numbers and underscore');
+      return;
+    }
+    mintNickname(trimmed);
+  }, [nickname, mintNickname]);
+
+  const effectiveNickname = nickContractDeployed && hasNickname && contractNickname
+    ? contractNickname
+    : nickname.trim() || 'Player';
+
+  const canPlay = ownedCarIds.has(selectedCarId) && (
+    !nickContractDeployed || hasNickname
+  );
+
   const handlePlay = useCallback(() => {
     setNickError('');
-    onPlay(selectedCarId, nickname.trim() || 'Player');
-  }, [nickname, selectedCarId, onPlay]);
+    onPlay(selectedCarId, effectiveNickname);
+  }, [effectiveNickname, selectedCarId, onPlay]);
 
   return (
     <div className="main-menu">
@@ -201,17 +231,40 @@ export function MainMenu({ nickname, setNickname, onNicknameSubmit, onPlay, menu
       <h1 className="main-menu-title">Tokyo JDM</h1>
 
       <div className="main-menu-nick">
-        <input
-          type="text"
-          className="main-menu-input"
-          placeholder="Nickname"
-          value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
-          maxLength={20}
-        />
-        <button type="button" className="menu-btn small" onClick={handleNicknameSubmit}>
-          SAVE
-        </button>
+        {nickContractDeployed && hasNickname ? (
+          <div className="main-menu-nick-display">
+            <span className="main-menu-nick-label">Nickname:</span>
+            <span className="main-menu-nick-value">{contractNickname || '—'}</span>
+          </div>
+        ) : nickContractDeployed ? (
+          <>
+            <input
+              type="text"
+              className="main-menu-input"
+              placeholder="Nickname (2–20 chars)"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              maxLength={20}
+            />
+            <button type="button" className="menu-btn small mint-free" onClick={handleMintNickname} disabled={mintNickPending}>
+              {mintNickPending ? 'MINTING…' : 'MINT NICKNAME'}
+            </button>
+          </>
+        ) : (
+          <>
+            <input
+              type="text"
+              className="main-menu-input"
+              placeholder="Nickname"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              maxLength={20}
+            />
+            <button type="button" className="menu-btn small" onClick={handleNicknameSubmit}>
+              SAVE
+            </button>
+          </>
+        )}
       </div>
       {nickError && <p className="main-menu-error">{nickError}</p>}
 
@@ -255,7 +308,7 @@ export function MainMenu({ nickname, setNickname, onNicknameSubmit, onPlay, menu
         </button>
       </div>
 
-      {ownedCarIds.has(selectedCarId) ? (
+      {canPlay ? (
         <button type="button" className="menu-btn play-btn" onClick={handlePlay}>
           PLAY
         </button>
@@ -264,7 +317,13 @@ export function MainMenu({ nickname, setNickname, onNicknameSubmit, onPlay, menu
           <button type="button" className="menu-btn play-btn disabled" disabled>
             PLAY
           </button>
-          <p className="main-menu-play-hint">Mint this car first to drive</p>
+          <p className="main-menu-play-hint">
+            {!ownedCarIds.has(selectedCarId)
+              ? 'Mint this car first to drive'
+              : nickContractDeployed && !hasNickname
+                ? 'Mint nickname first to play'
+                : 'Mint this car first to drive'}
+          </p>
         </div>
       )}
 

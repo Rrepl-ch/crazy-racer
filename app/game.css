@@ -518,10 +518,26 @@
 
 .main-menu-nick {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   justify-content: center;
   align-items: center;
-  margin-bottom: 8px;
+}
+
+.main-menu-nick-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.main-menu-nick-label {
+  color: #8888cc;
+  font-size: 14px;
+}
+
+.main-menu-nick-value {
+  color: #00ffcc;
+  font-weight: bold;
 }
 
 .main-menu-input {
