@@ -22,11 +22,11 @@ function loadOwnedCarIds(): Set<number> {
   if (typeof window === 'undefined') return new Set();
   try {
     const s = localStorage.getItem(STORAGE_OWNED);
-    if (!s) return new Set([0, 1, 2]);
+    if (!s) return new Set();
     const arr = JSON.parse(s) as number[];
-    return new Set(Array.isArray(arr) ? arr : [0, 1, 2]);
+    return new Set(Array.isArray(arr) ? arr : []);
   } catch {
-    return new Set([0, 1, 2]);
+    return new Set();
   }
 }
 
@@ -185,27 +185,32 @@ export function MainMenu({ nickname, setNickname, onNicknameSubmit, onPlay, menu
 
   return (
     <div className="main-menu">
-      <h1 className="main-menu-title">Crazy Racer</h1>
-
-      {!isConnected && connectors.length > 0 && (
-        <div className="main-menu-connect">
-          <button
-            type="button"
-            className="menu-btn connect-btn"
-            onClick={() => connect({ connector: connectors[1] ?? connectors[0] })}
-          >
-            Connect with Coinbase
-          </button>
-          <button
-            type="button"
-            className="menu-btn connect-btn secondary"
-            onClick={() => connect({ connector: connectors[2] ?? connectors[3] ?? connectors[0] })}
-          >
-            Other Wallets
-          </button>
+      {!isConnected ? (
+        <div className="welcome-overlay">
+          <h1 className="welcome-title">Crazy Racer</h1>
+          <p className="welcome-text">Connect your wallet to play</p>
+          {connectors.length > 0 && (
+            <div className="welcome-connect">
+              <button
+                type="button"
+                className="menu-btn connect-btn"
+                onClick={() => connect({ connector: connectors[1] ?? connectors[0] })}
+              >
+                Connect with Coinbase
+              </button>
+              <button
+                type="button"
+                className="menu-btn connect-btn secondary"
+                onClick={() => connect({ connector: connectors[2] ?? connectors[3] ?? connectors[0] })}
+              >
+                Other Wallets
+              </button>
+            </div>
+          )}
         </div>
-      )}
-      {isConnected && address && (
+      ) : (
+        <>
+      {address && (
         <div className="main-menu-wallet">
           <span>{address.slice(0, 6)}…{address.slice(-4)}</span>
           <button type="button" className="link-btn" onClick={() => disconnect()}>
@@ -213,6 +218,8 @@ export function MainMenu({ nickname, setNickname, onNicknameSubmit, onPlay, menu
           </button>
         </div>
       )}
+
+      <h1 className="main-menu-title">Crazy Racer</h1>
 
       <div className="main-menu-nick">
         <input
@@ -269,9 +276,18 @@ export function MainMenu({ nickname, setNickname, onNicknameSubmit, onPlay, menu
         </button>
       </div>
 
-      <button type="button" className="menu-btn play-btn" onClick={handlePlay}>
-        PLAY
-      </button>
+      {ownedCarIds.has(selectedCarId) ? (
+        <button type="button" className="menu-btn play-btn" onClick={handlePlay}>
+          PLAY
+        </button>
+      ) : (
+        <div className="main-menu-play-blocked">
+          <button type="button" className="menu-btn play-btn disabled" disabled>
+            PLAY
+          </button>
+          <p className="main-menu-play-hint">Mint this car first to drive</p>
+        </div>
+      )}
 
       <button type="button" className="menu-btn secondary" onClick={() => setShowLeaderboard(true)}>
         Leaderboard
@@ -306,6 +322,8 @@ export function MainMenu({ nickname, setNickname, onNicknameSubmit, onPlay, menu
             </button>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

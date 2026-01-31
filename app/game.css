@@ -956,6 +956,56 @@
   border-color: #00ffcc;
 }
 
+/* Welcome screen — must connect wallet first */
+.welcome-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+  padding: 32px;
+}
+
+.welcome-title {
+  font-size: 36px;
+  margin-bottom: 12px;
+  background: linear-gradient(45deg, #ff0066, #00a8ff, #00ffcc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.welcome-text {
+  font-size: 16px;
+  color: #8888cc;
+  margin-bottom: 28px;
+}
+
+.welcome-connect {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 280px;
+}
+
+/* Play blocked until car minted */
+.main-menu-play-blocked {
+  margin-top: 16px;
+}
+
+.main-menu-play-blocked .menu-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.main-menu-play-hint {
+  font-size: 13px;
+  color: #ff9966;
+  margin-top: 8px;
+}
+
 .start-button.secondary {
   margin-top: 10px;
   background: linear-gradient(45deg, #2a2a4a, #1a1a2e);
