@@ -18,7 +18,7 @@ export const farcasterConfig = {
     name: "Tokyo JDM",
     subtitle: "Tunnel racer on Base",
     description: "Top-down tunnel racer. Distance is score, dodge cars and obstacles.",
-    screenshotUrls: [`${ROOT_URL}/screenshot-portrait.png`],
+    screenshotUrls: [`${ROOT_URL}/cars/splash.png`],
     iconUrl: `${ROOT_URL}/cars/icon.png`,
     splashImageUrl: `${ROOT_URL}/cars/splash.png`,
     splashBackgroundColor: "#000000",
@@ -26,11 +26,11 @@ export const farcasterConfig = {
     webhookUrl: `${ROOT_URL}/api/webhook`,
     primaryCategory: "social",
     tags: ["marketing", "ads", "quickstart", "waitlist"],
-    heroImageUrl: `${ROOT_URL}/blue-hero.png`, 
+    heroImageUrl: `${ROOT_URL}/cars/splash.png`,
     tagline: "",
     ogTitle: "",
     ogDescription: "",
-    ogImageUrl: `${ROOT_URL}/blue-hero.png`,
+    ogImageUrl: `${ROOT_URL}/cars/splash.png`,
   },
 } as const;
 

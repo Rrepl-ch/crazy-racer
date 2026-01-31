@@ -39,7 +39,7 @@ export function Leaderboard({ onClose, currentAddress }: LeaderboardProps) {
                 >
                   <span className="leaderboard-rank">#{i + 1}</span>
                   <span className="leaderboard-avatar">{e.avatar || '😎'}</span>
-                  <span className="leaderboard-nick">{e.nickname}</span>
+                  <span className="leaderboard-nick" title={e.nickname || undefined}>…{e.address.slice(-10)}</span>
                   <span className="leaderboard-score">{e.score}</span>
                 </li>
               ))
