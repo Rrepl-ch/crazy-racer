@@ -4,6 +4,9 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
 import { CarSelect } from './CarSelect';
 import { Leaderboard } from './Leaderboard';
+import { BottomNav } from './BottomNav';
+import { HowToPlayPopup } from './HowToPlayPopup';
+import { ProfilePlaceholder } from './ProfilePlaceholder';
 import { CARS } from '@/app/types/cars';
 import { useOwnedCars, useMintCar } from '@/app/lib/useCrazyRacerContract';
 import { useNicknameStatus, useMintNickname } from '@/app/lib/useNicknameContract';
@@ -57,8 +60,7 @@ type MainMenuProps = {
 export function MainMenu({ nickname, setNickname, onNicknameSubmit, onPlay, menuKey = 0 }: MainMenuProps) {
   const [localOwned] = useState<Set<number>>(loadOwnedCarIds);
   const [selectedCarId, setSelectedCarId] = useState(loadSelectedCarId);
-  const [showLeaderboard, setShowLeaderboard] = useState(false);
-  const [showCarSelect, setShowCarSelect] = useState(false);
+  const [navTab, setNavTab] = useState<'howto' | 'car' | 'leaderboard' | 'profile' | null>(null);
   const [showNickMintConfirm, setShowNickMintConfirm] = useState(false);
   const [browsedCarId, setBrowsedCarId] = useState(0);
   const [nickError, setNickError] = useState('');
@@ -98,8 +100,8 @@ export function MainMenu({ nickname, setNickname, onNicknameSubmit, onPlay, menu
   }, []);
 
   useEffect(() => {
-    if (showCarSelect) setBrowsedCarId(selectedCarId);
-  }, [showCarSelect, selectedCarId]);
+    if (navTab === 'car') setBrowsedCarId(selectedCarId);
+  }, [navTab, selectedCarId]);
 
   useEffect(() => {
     if (!address) {
@@ -330,9 +332,6 @@ export function MainMenu({ nickname, setNickname, onNicknameSubmit, onPlay, menu
 
       <div className="main-menu-car">
         <span>{CARS[selectedCarId]?.name ?? '—'}</span>
-        <button type="button" className="menu-btn small" onClick={() => setShowCarSelect(true)}>
-          Car
-        </button>
       </div>
 
       {canPlay ? (
@@ -354,21 +353,28 @@ export function MainMenu({ nickname, setNickname, onNicknameSubmit, onPlay, menu
         </div>
       )}
 
-      <button type="button" className="menu-btn secondary" onClick={() => setShowLeaderboard(true)}>
-        Leaderboard
-      </button>
+      <BottomNav
+        activeTab={navTab}
+        onTab={(tab) => setNavTab(tab)}
+      />
 
-      {showLeaderboard && (
+      {navTab === 'howto' && (
+        <HowToPlayPopup onClose={() => setNavTab(null)} />
+      )}
+      {navTab === 'leaderboard' && (
         <Leaderboard
           onClose={() => {
             refreshRecord();
-            setShowLeaderboard(false);
+            setNavTab(null);
           }}
           currentAddress={address ?? undefined}
         />
       )}
-      {showCarSelect && (
-        <div className="menu-overlay" onClick={() => setShowCarSelect(false)}>
+      {navTab === 'profile' && (
+        <ProfilePlaceholder onClose={() => setNavTab(null)} />
+      )}
+      {navTab === 'car' && (
+        <div className="menu-overlay" onClick={() => setNavTab(null)}>
           <div className="menu-panel car-panel" onClick={(e) => e.stopPropagation()}>
             <h2 className="menu-title">Car</h2>
             <CarSelect
@@ -382,7 +388,7 @@ export function MainMenu({ nickname, setNickname, onNicknameSubmit, onPlay, menu
               onNextCar={() => setBrowsedCarId((prev) => Math.min(CARS.length - 1, prev + 1))}
               mintingCarId={mintingCarId}
             />
-            <button type="button" className="menu-btn" onClick={() => setShowCarSelect(false)}>
+            <button type="button" className="menu-btn" onClick={() => setNavTab(null)}>
               CLOSE
             </button>
           </div>
