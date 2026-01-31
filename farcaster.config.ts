@@ -19,7 +19,7 @@ export const farcasterConfig = {
     subtitle: "Tunnel racer on Base",
     description: "Top-down tunnel racer. Distance is score, dodge cars and obstacles.",
     screenshotUrls: [`${ROOT_URL}/cars/splash.png`],
-    iconUrl: `${ROOT_URL}/cars/icon.png`,
+    iconUrl: `${ROOT_URL}/icon.png`,
     splashImageUrl: `${ROOT_URL}/cars/splash.png`,
     splashBackgroundColor: "#000000",
     homeUrl: ROOT_URL,

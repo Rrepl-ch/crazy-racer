@@ -18,7 +18,7 @@ const config = createConfig({
   },
   connectors: [
     farcasterMiniApp(),
-    coinbaseWallet({ appName: "Tokyo JDM", appLogoUrl: `${appUrl}/cars/icon.png` }),
+    coinbaseWallet({ appName: "Tokyo JDM", appLogoUrl: `${appUrl}/icon.png` }),
     walletConnect({ projectId }),
     injected(),
   ],
