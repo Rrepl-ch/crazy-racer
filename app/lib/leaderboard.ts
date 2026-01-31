@@ -1,4 +1,4 @@
-import { createClient, type RedisClientType } from 'redis';
+import { createClient } from 'redis';
 import { LeaderboardEntry } from './store';
 
 const REDIS_URL = process.env.REDIS_URL;
@@ -8,7 +8,7 @@ export function isRedisAvailable(): boolean {
   return !!REDIS_URL;
 }
 
-async function withRedis<T>(fn: (client: RedisClientType) => Promise<T>): Promise<T> {
+async function withRedis<T>(fn: (client: ReturnType<typeof createClient>) => Promise<T>): Promise<T> {
   if (!REDIS_URL) throw new Error('REDIS_URL not set');
   const client = createClient({ url: REDIS_URL });
   await client.connect();
