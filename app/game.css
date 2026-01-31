@@ -858,6 +858,25 @@
   cursor: not-allowed;
 }
 
+@media (max-width: 480px) {
+  .car-select-center {
+    gap: 8px;
+    padding: 8px 4px 16px;
+  }
+  .car-select-arrow {
+    width: 44px;
+    min-width: 44px;
+    height: 48px;
+    font-size: 28px;
+    background: rgba(0, 168, 255, 0.25);
+    border-width: 2px;
+  }
+  .car-select-card {
+    width: 200px;
+    min-width: 200px;
+  }
+}
+
 .car-select-card {
   flex: 0 0 auto;
   width: 280px;

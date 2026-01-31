@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { createPublicClient, http } from 'viem';
-import { base } from 'viem/chains';
+import { base, sepolia } from 'viem/chains';
 import { CRAZY_RACER_CARS_ADDRESS, CRAZY_RACER_CARS_ABI } from '@/app/lib/contract';
+
+const chain = process.env.NEXT_PUBLIC_CHAIN === 'sepolia' ? sepolia : base;
 
 const BASE_URL = process.env.NEXT_PUBLIC_URL || 'https://crazyracer.app';
 
@@ -81,7 +83,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ tokenId
 
   try {
     const client = createPublicClient({
-      chain: base,
+      chain,
       transport: http(),
     });
 

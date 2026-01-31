@@ -1,28 +1,45 @@
+import { createClient, type RedisClientType } from 'redis';
 import { LeaderboardEntry } from './store';
 
-const REDIS_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-const REDIS_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-
+const REDIS_URL = process.env.REDIS_URL;
 const ENTRY_PREFIX = 'crazy_racer:entry:';
 
 export function isRedisAvailable(): boolean {
-  return !!(REDIS_URL && REDIS_TOKEN);
+  return !!REDIS_URL;
+}
+
+async function withRedis<T>(fn: (client: RedisClientType) => Promise<T>): Promise<T> {
+  if (!REDIS_URL) throw new Error('REDIS_URL not set');
+  const client = createClient({ url: REDIS_URL });
+  await client.connect();
+  try {
+    return await fn(client);
+  } finally {
+    await client.quit();
+  }
 }
 
 export async function getLeaderboardRedis(limit: number): Promise<LeaderboardEntry[]> {
   if (!isRedisAvailable()) return [];
   try {
-    const { Redis } = await import('@upstash/redis');
-    const redis = new Redis({ url: REDIS_URL!, token: REDIS_TOKEN! });
-    const keys = await redis.keys(`${ENTRY_PREFIX}*`);
-    const entries: LeaderboardEntry[] = [];
-    for (const key of keys) {
-      const raw = await redis.get(key);
-      if (raw && typeof raw === 'object' && 'address' in raw && 'score' in raw) {
-        entries.push(raw as LeaderboardEntry);
+    return await withRedis(async (client) => {
+      const keys = await client.keys(`${ENTRY_PREFIX}*`);
+      const entries: LeaderboardEntry[] = [];
+      for (const key of keys) {
+        const raw = await client.get(key);
+        if (raw) {
+          try {
+            const parsed = JSON.parse(raw) as LeaderboardEntry;
+            if (parsed && typeof parsed.address === 'string' && typeof parsed.score === 'number') {
+              entries.push(parsed);
+            }
+          } catch {
+            // skip invalid entry
+          }
+        }
       }
-    }
-    return entries.sort((a, b) => b.score - a.score).slice(0, limit);
+      return entries.sort((a, b) => b.score - a.score).slice(0, limit);
+    });
   } catch {
     return [];
   }
@@ -34,21 +51,29 @@ export async function addLeaderboardEntryRedis(
   if (!isRedisAvailable()) return;
   const key = `${ENTRY_PREFIX}${entry.address.toLowerCase()}`;
   try {
-    const { Redis } = await import('@upstash/redis');
-    const redis = new Redis({ url: REDIS_URL!, token: REDIS_TOKEN! });
-    const existing = (await redis.get(key)) as LeaderboardEntry | null;
-    const newScore = Math.floor(entry.score);
-    if (!existing || newScore > existing.score) {
-      const full: LeaderboardEntry = {
-        nickname: entry.nickname,
-        score: newScore,
-        address: entry.address,
-        carId: entry.carId,
-        timestamp: Date.now(),
-        avatar: entry.avatar ?? existing?.avatar ?? '',
-      };
-      await redis.set(key, full);
-    }
+    await withRedis(async (client) => {
+      const raw = await client.get(key);
+      let existing: LeaderboardEntry | null = null;
+      if (raw) {
+        try {
+          existing = JSON.parse(raw) as LeaderboardEntry;
+        } catch {
+          // ignore
+        }
+      }
+      const newScore = Math.floor(entry.score);
+      if (!existing || newScore > existing.score) {
+        const full: LeaderboardEntry = {
+          nickname: entry.nickname,
+          score: newScore,
+          address: entry.address,
+          carId: entry.carId,
+          timestamp: Date.now(),
+          avatar: entry.avatar ?? existing?.avatar ?? '',
+        };
+        await client.set(key, JSON.stringify(full));
+      }
+    });
   } catch {
     // ignore
   }
@@ -57,10 +82,16 @@ export async function addLeaderboardEntryRedis(
 export async function getBestScoreByAddressRedis(address: string): Promise<number> {
   if (!isRedisAvailable()) return 0;
   try {
-    const { Redis } = await import('@upstash/redis');
-    const redis = new Redis({ url: REDIS_URL!, token: REDIS_TOKEN! });
-    const entry = (await redis.get(`${ENTRY_PREFIX}${address.toLowerCase()}`)) as LeaderboardEntry | null;
-    return entry?.score ?? 0;
+    return await withRedis(async (client) => {
+      const raw = await client.get(`${ENTRY_PREFIX}${address.toLowerCase()}`);
+      if (!raw) return 0;
+      try {
+        const parsed = JSON.parse(raw) as LeaderboardEntry;
+        return typeof parsed.score === 'number' ? parsed.score : 0;
+      } catch {
+        return 0;
+      }
+    });
   } catch {
     return 0;
   }

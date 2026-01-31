@@ -40,10 +40,6 @@ function loadSelectedCarId(): number {
   }
 }
 
-function saveOwned(owned: Set<number>) {
-  localStorage.setItem(STORAGE_OWNED, JSON.stringify([...owned]));
-}
-
 function saveSelected(id: number) {
   localStorage.setItem(STORAGE_SELECTED, String(id));
 }
@@ -57,7 +53,7 @@ type MainMenuProps = {
 };
 
 export function MainMenu({ nickname, setNickname, onNicknameSubmit, onPlay, menuKey = 0 }: MainMenuProps) {
-  const [localOwned, setLocalOwned] = useState<Set<number>>(loadOwnedCarIds);
+  const [localOwned] = useState<Set<number>>(loadOwnedCarIds);
   const [selectedCarId, setSelectedCarId] = useState(loadSelectedCarId);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showCarSelect, setShowCarSelect] = useState(false);
@@ -127,13 +123,7 @@ export function MainMenu({ nickname, setNickname, onNicknameSubmit, onPlay, menu
         if (carId !== browsedCarId) return;
         mint();
       } else {
-        await new Promise((r) => setTimeout(r, 1500));
-        setLocalOwned((prev) => {
-          const next = new Set(prev);
-          next.add(carId);
-          saveOwned(next);
-          return next;
-        });
+        alert('Contract not configured. Add NEXT_PUBLIC_CRAZY_RACER_CONTRACT to Vercel env and redeploy.');
       }
     },
     [contractDeployed, address, browsedCarId, mint]
@@ -149,18 +139,7 @@ export function MainMenu({ nickname, setNickname, onNicknameSubmit, onPlay, menu
         if (carId !== browsedCarId) return;
         mint();
       } else {
-        try {
-          await new Promise((r) => setTimeout(r, 2000));
-          setLocalOwned((prev) => {
-            const next = new Set(prev);
-            next.add(carId);
-            saveOwned(next);
-            return next;
-          });
-        } catch (e) {
-          console.error(e);
-          alert('Mint failed. Try again.');
-        }
+        alert('Contract not configured. Add NEXT_PUBLIC_CRAZY_RACER_CONTRACT to Vercel env and redeploy.');
       }
     },
     [contractDeployed, address, browsedCarId, mint]

@@ -1,5 +1,23 @@
 # Деплой контракта через Remix — подробно
 
+## Вариант A: Тест на Sepolia (рекомендуется для проверки)
+
+Sepolia — тестовая сеть Ethereum. Тестовый ETH бесплатный: https://sepoliafaucet.com или https://www.alchemy.com/faucets/ethereum-sepolia
+
+1. В MetaMask выбери сеть **Sepolia**
+2. В Remix: Environment → **Injected Provider - MetaMask**
+3. Деплой как в шаге 6 ниже (те же параметры `_treasury` и `baseURI_`)
+4. После деплоя добавь в `.env.local`:
+   ```
+   NEXT_PUBLIC_CHAIN=sepolia
+   NEXT_PUBLIC_CRAZY_RACER_CONTRACT=0x...адрес...
+   ```
+5. Перезапусти `npm run dev`
+
+---
+
+## Вариант B: Продакшн на Base
+
 ## 1. Открой Remix
 
 Перейди на https://remix.ethereum.org
@@ -29,11 +47,10 @@
 3. Нажми **Compile CrazyRacerCars.sol**
 4. Внизу должна быть зелёная галочка
 
-## 5. Подключи MetaMask к Base
+## 5. Подключи MetaMask
 
-1. В MetaMask выбери сеть **Base Mainnet**
-2. Если нет — добавь: Settings → Networks → Add Network
-3. Данные для Base Mainnet: https://chainlist.org/chain/8453
+**Для Sepolia:** MetaMask → Sepolia (Chain ID 11155111)  
+**Для Base:** MetaMask → Base Mainnet (Chain ID 8453). Если нет — добавь через https://chainlist.org/chain/8453
 
 ## 6. Деплой
 
