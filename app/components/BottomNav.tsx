@@ -16,7 +16,9 @@ export function BottomNav({ activeTab, onTab }: BottomNavProps) {
         onClick={() => onTab('howto')}
         aria-label="How to play"
       >
-        <span className="bottom-nav-icon">❓</span>
+        <span className="bottom-nav-icon">
+          <img src="/4.png" alt="" width={44} height={44} className="bottom-nav-icon-img" />
+        </span>
         <span className="bottom-nav-label">How to play</span>
       </button>
       <button
@@ -25,7 +27,9 @@ export function BottomNav({ activeTab, onTab }: BottomNavProps) {
         onClick={() => onTab('car')}
         aria-label="Car"
       >
-        <span className="bottom-nav-icon">🚗</span>
+        <span className="bottom-nav-icon">
+          <img src="/3.png" alt="" width={44} height={44} className="bottom-nav-icon-img" />
+        </span>
         <span className="bottom-nav-label">Car</span>
       </button>
       <button
@@ -34,7 +38,9 @@ export function BottomNav({ activeTab, onTab }: BottomNavProps) {
         onClick={() => onTab('leaderboard')}
         aria-label="Leaderboard"
       >
-        <span className="bottom-nav-icon">🏆</span>
+        <span className="bottom-nav-icon">
+          <img src="/2.png" alt="" width={44} height={44} className="bottom-nav-icon-img" />
+        </span>
         <span className="bottom-nav-label">Leaderboard</span>
       </button>
       <button
@@ -43,7 +49,9 @@ export function BottomNav({ activeTab, onTab }: BottomNavProps) {
         onClick={() => onTab('profile')}
         aria-label="Profile"
       >
-        <span className="bottom-nav-icon">👤</span>
+        <span className="bottom-nav-icon">
+          <img src="/1.png" alt="" width={44} height={44} className="bottom-nav-icon-img" />
+        </span>
         <span className="bottom-nav-label">Profile</span>
       </button>
     </nav>

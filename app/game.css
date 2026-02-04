@@ -1495,6 +1495,15 @@
 .bottom-nav-icon {
   font-size: 20px;
   line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bottom-nav-icon-img {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  aspect-ratio: 1 / 1;
 }
 
 .bottom-nav-label {
