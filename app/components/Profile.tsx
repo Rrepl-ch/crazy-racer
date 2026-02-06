@@ -52,11 +52,6 @@ export type ProfileProps = {
   chainId?: number;
 };
 
-function shortAddress(addr: string): string {
-  if (addr.length <= 10) return addr;
-  return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
-}
-
 function formatProgress(progress: AchievementProgress): string {
   if (progress.unlocked) {
     if (progress.target != null) return `${progress.target.toLocaleString()} ✓`;
@@ -167,11 +162,6 @@ export function Profile({
             )}
           </div>
           <p className="profile-nickname">{nickname || 'Player'}</p>
-          {address && (
-            <p className="profile-address" title={address}>
-              {shortAddress(address)}
-            </p>
-          )}
         </div>
 
         <div className="profile-stats">
