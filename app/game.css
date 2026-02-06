@@ -824,6 +824,13 @@
   background: rgba(0, 168, 255, 0.08);
   border-radius: 12px;
   border: 1px solid rgba(0, 168, 255, 0.2);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.leaderboard-row:hover {
+  background: rgba(0, 168, 255, 0.15);
+  border-color: rgba(0, 168, 255, 0.35);
 }
 
 .leaderboard-rank {

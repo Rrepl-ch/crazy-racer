@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Profile } from './Profile';
 
 type LeaderboardEntry = { nickname: string; score: number; address: string; carId: number; timestamp: number; avatar?: string };
 
@@ -9,6 +10,7 @@ type LeaderboardProps = { onClose: () => void; currentAddress?: string };
 export function Leaderboard({ onClose, currentAddress }: LeaderboardProps) {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedEntry, setSelectedEntry] = useState<LeaderboardEntry | null>(null);
 
   useEffect(() => {
     fetch('/api/leaderboard?limit=20')
@@ -20,6 +22,19 @@ export function Leaderboard({ onClose, currentAddress }: LeaderboardProps) {
   }, []);
 
   const addr = currentAddress?.toLowerCase();
+
+  if (selectedEntry) {
+    return (
+      <Profile
+        onClose={() => setSelectedEntry(null)}
+        nickname={selectedEntry.nickname?.trim() || 'Player'}
+        avatar={selectedEntry.avatar ?? ''}
+        address={selectedEntry.address}
+        bestScore={selectedEntry.score}
+        isOwnProfile={false}
+      />
+    );
+  }
 
   return (
     <div className="menu-overlay" onClick={onClose}>
@@ -35,7 +50,11 @@ export function Leaderboard({ onClose, currentAddress }: LeaderboardProps) {
               entries.map((e, i) => (
                 <li
                   key={`${e.address}-${i}`}
+                  role="button"
+                  tabIndex={0}
                   className={`leaderboard-row ${e.address.toLowerCase() === addr ? 'leaderboard-row-me' : ''}`}
+                  onClick={() => setSelectedEntry(e)}
+                  onKeyDown={(ev) => (ev.key === 'Enter' || ev.key === ' ') && setSelectedEntry(e)}
                 >
                   <span className="leaderboard-rank">#{i + 1}</span>
                   <span className="leaderboard-avatar">

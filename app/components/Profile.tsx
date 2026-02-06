@@ -50,6 +50,8 @@ export type ProfileProps = {
   address: string | undefined;
   bestScore: number | null;
   chainId?: number;
+  /** false = просмотр чужого профиля (напр. из лидерборда), скрыть Disconnect */
+  isOwnProfile?: boolean;
 };
 
 function formatProgress(progress: AchievementProgress): string {
@@ -88,6 +90,7 @@ export function Profile({
   address,
   bestScore,
   chainId,
+  isOwnProfile = true,
 }: ProfileProps) {
   const { disconnect } = useDisconnect();
   const [achievementsOpen, setAchievementsOpen] = useState(false);
@@ -264,13 +267,13 @@ export function Profile({
         </div>
 
         <div className="profile-actions">
-          {address && (
+          {address && isOwnProfile && (
             <button type="button" className="menu-btn secondary" onClick={handleDisconnect}>
               Disconnect
             </button>
           )}
           <button type="button" className="menu-btn" onClick={onClose}>
-            Close
+            {isOwnProfile ? 'Close' : 'Back'}
           </button>
         </div>
       </div>
