@@ -5,6 +5,7 @@ import './game.css';
 import { MainMenu } from './components/MainMenu';
 import { getCarById } from '@/app/types/cars';
 import { useAccount } from 'wagmi';
+import { updateProfileStats, syncProfileUpdateToApi } from '@/app/lib/profileStats';
 
 type Car = {
   x: number;
@@ -42,7 +43,7 @@ export default function GamePage() {
   const [speed, setSpeed] = useState(1.5);
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [nickname, setNickname] = useState('');
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
 
   const imagesRef = useRef<{
     player: HTMLImageElement | null;
@@ -83,6 +84,7 @@ export default function GamePage() {
   const leaderboardSubmittedRef = useRef(false);
   const tabVisibleRef = useRef(true);
   const pausedRef = useRef(false);
+  const passedCountRef = useRef(0);
 
   const createImage = (): HTMLImageElement => {
     if (typeof window !== 'undefined') return new Image();
@@ -189,6 +191,7 @@ export default function GamePage() {
     lastLaneSameRef.current = null;
     lastLaneOppRef.current = null;
     leaderboardSubmittedRef.current = false;
+    passedCountRef.current = 0;
     mousePosRef.current = laneCenters[1];
     setGameActive(true);
     setIsPaused(false);
@@ -204,6 +207,7 @@ export default function GamePage() {
     lastLaneSameRef.current = null;
     lastLaneOppRef.current = null;
     leaderboardSubmittedRef.current = false;
+    passedCountRef.current = 0;
     mousePosRef.current = laneCenters[1];
     setGameActive(true);
     setIsPaused(false);
@@ -407,6 +411,7 @@ export default function GamePage() {
           let newPassed = car.passed;
           if (!car.passed && newY > 520 && !car.isOpp) {
             newPassed = true;
+            passedCountRef.current += 1;
             setScore((prev) => prev + scoreMultiplierRef.current);
           }
           const playerX = mousePosRef.current;
@@ -526,8 +531,16 @@ export default function GamePage() {
   useEffect(() => {
     if (!gameActive && screen === 'game' && score > 0) {
       submitScore(score, gameCarId, gameNickname, address, gameAvatar || undefined);
+      const update = {
+        distance: Math.floor(score),
+        carsPassed: passedCountRef.current,
+        carId: gameCarId,
+        chainId,
+      };
+      updateProfileStats(address ?? undefined, update);
+      syncProfileUpdateToApi(address ?? undefined, update);
     }
-  }, [gameActive, screen, score, gameCarId, gameNickname, gameAvatar, address, submitScore]);
+  }, [gameActive, screen, score, gameCarId, gameNickname, gameAvatar, address, chainId, submitScore]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

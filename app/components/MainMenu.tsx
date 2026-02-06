@@ -6,7 +6,7 @@ import { CarSelect } from './CarSelect';
 import { Leaderboard } from './Leaderboard';
 import { BottomNav } from './BottomNav';
 import { HowToPlayPopup } from './HowToPlayPopup';
-import { ProfilePlaceholder } from './ProfilePlaceholder';
+import { Profile } from './Profile';
 import { CARS } from '@/app/types/cars';
 import { useOwnedCars, useMintCar } from '@/app/lib/useCrazyRacerContract';
 import { useNicknameStatus, useMintNickname } from '@/app/lib/useNicknameContract';
@@ -65,7 +65,7 @@ export function MainMenu({ nickname, setNickname, onNicknameSubmit, onPlay, menu
   const [browsedCarId, setBrowsedCarId] = useState(0);
   const [nickError, setNickError] = useState('');
   const [, setNickSuccess] = useState(false);
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, chainId } = useAccount();
   const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
   const [record, setRecord] = useState<number | null>(null);
@@ -375,7 +375,14 @@ export function MainMenu({ nickname, setNickname, onNicknameSubmit, onPlay, menu
         />
       )}
       {navTab === 'profile' && (
-        <ProfilePlaceholder onClose={() => setNavTab(null)} />
+        <Profile
+          onClose={() => setNavTab(null)}
+          nickname={effectiveNickname}
+          avatar={effectiveAvatar}
+          address={address ?? undefined}
+          bestScore={record}
+          chainId={chainId}
+        />
       )}
       {navTab === 'car' && (
         <div className="menu-overlay" onClick={() => setNavTab(null)}>
