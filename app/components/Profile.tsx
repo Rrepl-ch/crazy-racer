@@ -58,7 +58,10 @@ function shortAddress(addr: string): string {
 }
 
 function formatProgress(progress: AchievementProgress): string {
-  if (progress.unlocked) return '✓';
+  if (progress.unlocked) {
+    if (progress.target != null) return `${progress.target.toLocaleString()} ✓`;
+    return '✓';
+  }
   if (progress.current != null && progress.target != null) {
     return `${progress.current.toLocaleString()} / ${progress.target.toLocaleString()}`;
   }
@@ -226,7 +229,7 @@ export function Profile({
               {ACHIEVEMENT_GROUPS.map((group) => {
                 const groupAchs = getAchievementsByIds(group.achievementIds);
                 const unlockedInGroup = groupAchs.filter((a) => a.check(stats, chainId, bestScoreNum)).length;
-                const uncompletedAchs = groupAchs.filter((a) => !a.check(stats, chainId, bestScoreNum));
+                const allUnlocked = unlockedInGroup === group.achievementIds.length;
                 const expanded = expandedGroupIds.has(group.id);
 
                 return (
@@ -251,17 +254,16 @@ export function Profile({
                     </button>
                     {expanded && (
                       <div className="profile-achievement-sublist">
-                        {uncompletedAchs.length === 0 ? (
+                        {allUnlocked && (
                           <p className="profile-achievement-all-done">Все получены</p>
-                        ) : (
-                          uncompletedAchs.map((ach) => (
-                            <UncompletedRow
-                              key={ach.id}
-                              ach={ach}
-                              progress={getAchievementProgress(ach, stats, chainId, bestScore)}
-                            />
-                          ))
                         )}
+                        {groupAchs.map((ach) => (
+                          <UncompletedRow
+                            key={ach.id}
+                            ach={ach}
+                            progress={getAchievementProgress(ach, stats, chainId, bestScore)}
+                          />
+                        ))}
                       </div>
                     )}
                   </div>
