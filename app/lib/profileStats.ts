@@ -234,8 +234,8 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     title: `Рекорд ${m >= 1000 ? m / 1000 + 'k' : m}`,
     description: `Набрать ${m.toLocaleString()} очков в одном заезде`,
     icon: '🏆',
-    check: (_s, _c, bestScore) => (bestScore ?? 0) >= m,
-    getProgress: (_s, _c, bestScore): AchievementProgress => {
+    check: (_s: ProfileStats | null, _c?: number, bestScore?: number) => (bestScore ?? 0) >= m,
+    getProgress: (_s: ProfileStats | null, _c?: number, bestScore?: number): AchievementProgress => {
       const cur = bestScore ?? 0;
       return { unlocked: cur >= m, current: cur, target: m };
     },

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useDisconnect } from 'wagmi';
 import { CARS } from '@/app/types/cars';
 import {
@@ -129,7 +130,7 @@ export function Profile({
           <div className="profile-avatar-wrap">
             {avatar.startsWith('http') ? (
               <div className="profile-avatar profile-avatar-pfp">
-                <img src={avatar} alt="" referrerPolicy="no-referrer" />
+                <Image src={avatar} alt="" width={72} height={72} referrerPolicy="no-referrer" unoptimized />
               </div>
             ) : (
               <div className="profile-avatar profile-avatar-emoji">
