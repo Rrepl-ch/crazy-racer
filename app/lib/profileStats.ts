@@ -177,9 +177,6 @@ export const CARS_PASSED_MILESTONES = [50, 200, 500, 2000, 10000];
 // Collection: number of different cars driven at least once
 export const COLLECTION_MILESTONES = [2, 3, 4, 5, 6];
 
-// Рекорд в одном заезде — из лидерборда (уже существующая стата на сайте)
-export const RECORD_MILESTONES = [5000, 10000, 20000, 50000, 100000];
-
 function getUniqueCarsCount(stats: ProfileStats | null): number {
   if (!stats?.gamesPerCar) return 0;
   return Object.keys(stats.gamesPerCar).length;
@@ -191,7 +188,7 @@ export type AchievementProgress = {
   target?: number;
 };
 
-/** bestScore = рекорд с лидерборда (уже существующая стата на сайте), опционально для ачивок "Рекорд". */
+/** bestScore = рекорд с лидерборда (один заезд), используется для ачивок "Расстояние". */
 export type AchievementDef = {
   id: string;
   title: string;
@@ -202,18 +199,17 @@ export type AchievementDef = {
 };
 
 export const ACHIEVEMENTS: AchievementDef[] = [
-  // Distance
+  // Расстояние = рекорд в одном заезде (из лидерборда)
   ...DISTANCE_MILESTONES.map((m) => ({
     id: `distance_${m}`,
     title: `${m >= 1000 ? m / 1000 + 'k' : m} km`,
-    description: `Проехать ${m.toLocaleString()} в сумме`,
+    description: `Набрать ${m.toLocaleString()} очков в одном заезде`,
     icon: '🛣️',
-    check: (s: ProfileStats | null) => (s ? s.totalDistance >= m : false),
-    getProgress: (s: ProfileStats | null): AchievementProgress => ({
-      unlocked: s ? s.totalDistance >= m : false,
-      current: s?.totalDistance ?? 0,
-      target: m,
-    }),
+    check: (_s: ProfileStats | null, _c?: number, bestScore?: number) => (bestScore ?? 0) >= m,
+    getProgress: (_s: ProfileStats | null, _c?: number, bestScore?: number): AchievementProgress => {
+      const cur = bestScore ?? 0;
+      return { unlocked: cur >= m, current: cur, target: m };
+    },
   })),
   // Cars passed
   ...CARS_PASSED_MILESTONES.map((m) => ({
@@ -227,18 +223,6 @@ export const ACHIEVEMENTS: AchievementDef[] = [
       current: s?.totalCarsPassed ?? 0,
       target: m,
     }),
-  })),
-  // Record (best single run) — из лидерборда, уже существующая стата на сайте
-  ...RECORD_MILESTONES.map((m) => ({
-    id: `record_${m}`,
-    title: `Рекорд ${m >= 1000 ? m / 1000 + 'k' : m}`,
-    description: `Набрать ${m.toLocaleString()} очков в одном заезде`,
-    icon: '🏆',
-    check: (_s: ProfileStats | null, _c?: number, bestScore?: number) => (bestScore ?? 0) >= m,
-    getProgress: (_s: ProfileStats | null, _c?: number, bestScore?: number): AchievementProgress => {
-      const cur = bestScore ?? 0;
-      return { unlocked: cur >= m, current: cur, target: m };
-    },
   })),
   // Collection: different cars driven
   ...COLLECTION_MILESTONES.map((m) => ({
@@ -323,12 +307,6 @@ export const ACHIEVEMENT_GROUPS: AchievementGroupDef[] = [
     title: 'Расстояние',
     icon: '🛣️',
     achievementIds: DISTANCE_MILESTONES.map((m) => `distance_${m}`),
-  },
-  {
-    id: 'record',
-    title: 'Рекорд',
-    icon: '🏆',
-    achievementIds: RECORD_MILESTONES.map((m) => `record_${m}`),
   },
   {
     id: 'cars',

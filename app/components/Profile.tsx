@@ -20,6 +20,29 @@ import {
 
 const PROFILE_STORAGE_PREFIX = 'jdm_profile_';
 
+/** Объединяем статы с сервера и локальные, чтобы коллекция машин и остальное не терялось. */
+function mergeProfileStats(server: ProfileStats | null, local: ProfileStats | null): ProfileStats {
+  if (!server && !local) return { totalDistance: 0, totalCarsPassed: 0, gamesPerCar: {}, totalGames: 0 };
+  if (!server) return local!;
+  if (!local) return server;
+  const gamesPerCar: Record<number, number> = {};
+  const allCarIds = new Set([...Object.keys(server.gamesPerCar || {}), ...Object.keys(local.gamesPerCar || {})]);
+  for (const k of allCarIds) {
+    const id = parseInt(k, 10);
+    if (!Number.isFinite(id)) continue;
+    const s = server.gamesPerCar?.[id] ?? 0;
+    const l = local.gamesPerCar?.[id] ?? 0;
+    gamesPerCar[id] = Math.max(s, l);
+  }
+  return {
+    totalDistance: Math.max(server.totalDistance, local.totalDistance),
+    totalCarsPassed: Math.max(server.totalCarsPassed, local.totalCarsPassed),
+    gamesPerCar,
+    totalGames: Math.max(server.totalGames, local.totalGames),
+    connectedWithBaseAt: server.connectedWithBaseAt ?? local.connectedWithBaseAt,
+  };
+}
+
 export type ProfileProps = {
   onClose: () => void;
   nickname: string;
@@ -77,9 +100,11 @@ export function Profile({
     if (!address) return;
     fetchProfileStatsFromApi(address).then((s) => {
       if (s) {
-        setServerStats(s);
+        const local = getProfileStats(address);
+        const merged = mergeProfileStats(s, local);
+        setServerStats(merged);
         try {
-          localStorage.setItem(`${PROFILE_STORAGE_PREFIX}${address.toLowerCase()}`, JSON.stringify(s));
+          localStorage.setItem(`${PROFILE_STORAGE_PREFIX}${address.toLowerCase()}`, JSON.stringify(merged));
         } catch {
           // ignore
         }
